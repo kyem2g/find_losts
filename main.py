@@ -1,5 +1,6 @@
 import os
 import sqlite3
+import sys
 from datetime import datetime
 from flask import Flask, request, redirect, render_template_string
 
@@ -20,7 +21,7 @@ PAGE = """
 </form>
 <h2>분실물 목록</h2>
 {% for item in items %}
-  <p><b>{{ item[0] }}</b><br>습득 장소 : {{ item[1] }}<br>특징 : {{ item[2] }}<br>연락: {{ item[3] }}<br>등록 일자 : {{ item[4] }}</p>
+  <p><b>{{ item[0] }}</b><br>등록번호: {{ item[5] }}<br>습득 장소 : {{ item[1] }}<br>특징 : {{ item[2] }}<br>연락: {{ item[3] }}<br>등록 일자 : {{ item[4] }}</p>
 {% else %}<p>등록된 분실물이 없습니다.</p>{% endfor %}
 """
 
@@ -34,9 +35,15 @@ def home():
         return redirect("/")
 
     with sqlite3.connect(DB) as db:
-        items = db.execute("SELECT * FROM items ORDER BY rowid DESC").fetchall()
+        items = db.execute("SELECT *, rowid FROM items ORDER BY rowid DESC").fetchall()
     return render_template_string(PAGE, items=items)
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    if len(sys.argv) == 3 and sys.argv[1] == "delete":
+        with sqlite3.connect(DB) as db:
+            result = db.execute("DELETE FROM items WHERE rowid = ?", (sys.argv[2],))
+        print("Deleted." if result.rowcount else "ID not found.")
+    else:
+        app.run(host="0.0.0.0", port=5000, debug=True)
+
