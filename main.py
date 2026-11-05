@@ -5,7 +5,7 @@ from datetime import datetime
 from flask import Flask, request, redirect, render_template_string
 
 app = Flask(__name__)
-DB = os.environ.get("DATABASE_PATH", "lost_items.db")
+DB = os.environ.get("DATABASE_PATH", os.path.join(os.path.dirname(os.path.abspath(__file__)), "lost_items.db"))
 
 with sqlite3.connect(DB) as db:
     db.execute("CREATE TABLE IF NOT EXISTS items (name, place, description, contact, date)")
@@ -46,4 +46,3 @@ if __name__ == "__main__":
         print("Deleted." if result.rowcount else "ID not found.")
     else:
         app.run(host="0.0.0.0", port=5000, debug=True)
-
