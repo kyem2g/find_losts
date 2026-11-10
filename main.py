@@ -25,8 +25,9 @@ PAGE = """
   <button>등록</button>
 </form>
 <h2>분실물 목록</h2>
+{% if error %}<p style="color: red;">삭제 비밀번호가 틀렸습니다. 다시 확인해 주세요.</p>{% endif %}
 {% for item in items %}
-  <p><b>{{ item[0] }}</b><br>등록번호: {{ item[5] }}<br>습득 장소 : {{ item[1] }}<br>특징 : {{ item[2] }}<br>연락: {{ item[3] }}<br>등록 일자 : {{ item[4] }}</p>
+  <p><b>{{ item[0] }}</b><br>등록번호: {{ item[5] }}<br>습득 장소 : {{ item[1] }}<br>특징 : {{ item[2] }}<br>연락 방법 : {{ item[3] }}<br>등록 일자 : {{ item[4] }}</p>
   {% if item[6] %}
   <form method="post" action="{{ url_for('delete_post', item_id=item[5]) }}">
     <input type="password" name="password" placeholder="삭제 비밀번호" required>
@@ -53,7 +54,7 @@ def home():
 
     with sqlite3.connect(DB) as db:
         items = db.execute("SELECT name, place, description, contact, date, rowid, password_hash FROM items ORDER BY rowid DESC").fetchall()
-    return render_template_string(PAGE, items=items)
+    return render_template_string(PAGE, items=items, error=request.args.get("error"))
 
 
 @app.route("/delete/<int:item_id>", methods=["POST"])
@@ -64,7 +65,7 @@ def delete_post(item_id):
         if row is None:
             return "게시물을 찾을 수 없습니다.", 404
         if not row[0] or not check_password_hash(row[0], password):
-            return "삭제 비밀번호가 올바르지 않습니다.", 403
+            return redirect("/?error=wrong")
         db.execute("DELETE FROM items WHERE rowid = ?", (item_id,))
     return redirect("/")
 
