@@ -15,7 +15,7 @@ with sqlite3.connect(DB) as db:
         db.execute("ALTER TABLE items ADD COLUMN password_hash TEXT")
 
 PAGE = """
-<h1>분실물 찾기</h1>
+<h1>분실물 찾기 서비스</h1>
 <form method="post">
   <input name="name" placeholder="물건 이름" required>
   <input name="place" placeholder="습득 장소" required>
